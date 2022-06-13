@@ -2,9 +2,11 @@ import re
 import socket
 import sys
 from _thread import start_new_thread
+from colorama import Fore, Back, Style
 
-from src.web_extractor import get_scp
+from src.web_extractors.the_scp_foundation import the_scp_foundation
 
+from src.web_extractors.scp_wiki_wikidot import scp_wiki_wikidot
 
 HOST = ""
 PORT = 5000
@@ -37,6 +39,7 @@ LOGO = b"""
           :!^.  .!YPPY7^:              :^7YPPY!.  .^!:          \r
                     :!J5PP55YJJ??JJY55PP5J!:                    \r
                          .:^~!!!!!!~^:.                         \r
+\n\r
 """
 
 
@@ -52,17 +55,9 @@ def telnet_negotiation_line_mode(conn: socket.socket):
     # rev
 
 
-def ask_scp_num(conn: socket.socket):
+def ask_command(conn: socket.socket):
     # telnet_negotiation_line_mode(conn)
-    conn.send(b"SCP> ")
-    scp = conn.recv(8).decode("utf8")
-    temp = re.search(r'\d+', scp)
-    if temp:
-        scp_num = int(temp.group())
-        # telnet_negotiation_line_mode(conn)
-        text = get_scp(scp_num)
-        text = text.replace('\n', '\r\n')
-        conn.send(text.encode("utf8"))
+    pass
 
 
 
@@ -70,9 +65,26 @@ def client_thread(conn: socket.socket): #threader client
     conn.send(LOGO)
     welcome = b"Welcome to the server. Type something and hit enter \r\n"
     conn.send(welcome)
+    scp_client = scp_wiki_wikidot()
     while True:
         try:
-            ask_scp_num(conn)
+            conn.send(b"SCP> ")
+            command = conn.recv(8).decode("utf8")
+            if re.search("quit", command):
+                break
+            else:
+                temp = re.search(r'\d+', command)
+                if temp:
+                    scp_num = temp.group()
+                    scp_num = scp_num.replace(" ", "-")
+                    # telnet_negotiation_line_mode(conn)
+                    text = scp_client.get_scp(scp_num)
+                    text = text.replace('\n', '\r\n')
+                    conn.send(text.encode("utf8"))
+
+
+
+            ask_command(conn)
         except Exception as e:
             print(e)
             break
@@ -81,6 +93,7 @@ def client_thread(conn: socket.socket): #threader client
 
 
 def main ():
+    
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     print("Socket Created")
