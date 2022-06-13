@@ -1,4 +1,3 @@
-from distutils.filelist import findall
 import requests
 from bs4 import BeautifulSoup, Tag, NavigableString
 from typing import Union
