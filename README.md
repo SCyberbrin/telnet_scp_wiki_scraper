@@ -1,6 +1,8 @@
 # telnet_scp_wiki_scraper
 ## Scraps scp wiki with the specific scp over telnet.
 
+<a title="The original SCP logo was designed by far2, based on a free asset from Adobe Illustrator&#039;s &quot;Mad Science&quot; asset library, which in turn was based on the electrostatic discharge warning symbol. The first high-resolution PNG version of the logo was made by Aelanna, based on the original SCP logo., CC BY-SA 3.0 &lt;https://creativecommons.org/licenses/by-sa/3.0&gt;, via Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:SCP_Foundation_(emblem).svg"><img width="128" alt="SCP Foundation (emblem)" src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/SCP_Foundation_%28emblem%29.svg/128px-SCP_Foundation_%28emblem%29.svg.png"></a>
+
 It creates a telnet-server that makes it look like an old SCP Foundation Database. In reality, it just asks for the specific SCP name or ID and search it in the https://scp-wiki.wikidot.com/ Website.
 
 
