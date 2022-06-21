@@ -4,12 +4,10 @@ import sys
 from _thread import start_new_thread
 from colorama import Fore, Back, Style
 
-from src.web_extractors.the_scp_foundation import the_scp_foundation
-
 from src.web_extractors.scp_wiki_wikidot import scp_wiki_wikidot
 
 HOST = ""
-PORT = 5000
+PORT = 5001
 
 LOGO = b"""
                        JPYYYYYYYYYYYYYYPJ                       \r
@@ -43,48 +41,34 @@ LOGO = b"""
 """
 
 
-def telnet_negotiation_line_mode(conn: socket.socket):
-    payload = bytearray([255, 253, 34])
-    conn.send(payload)
-
-    payload_accepted = bytes([255, 251, 34])
-
-    rev = conn.recv(1024)
-    # if rev.hex() != payload_accepted:
-    #     raise Exception("linemode not accepted")
-    # rev
-
-
-def ask_command(conn: socket.socket):
-    # telnet_negotiation_line_mode(conn)
-    pass
-
+def ask_command(conn: socket.socket) -> bool:
+    conn.send(b"SCP> ")
+    command = conn.recv(8).decode("utf8")
+    if re.search("quit", command):
+        return True
+    else:
+        temp = re.search(r'\d+', command)
+        if temp:
+            scp_num = temp.group()
+            scp_num = scp_num.replace(" ", "-")
+            scp_client = scp_wiki_wikidot()
+            text = scp_client.get_scp(scp_num)
+            text = text.replace('\n', '\r\n')
+            conn.send(text.encode("utf8"))
+        else:
+            conn.send("Not a valid SCP\r\n".encode("utf8"))
+        return False
 
 
 def client_thread(conn: socket.socket): #threader client
     conn.send(LOGO)
     welcome = b"Welcome to the server. Type something and hit enter \r\n"
     conn.send(welcome)
-    scp_client = scp_wiki_wikidot()
     while True:
         try:
-            conn.send(b"SCP> ")
-            command = conn.recv(8).decode("utf8")
-            if re.search("quit", command):
+            kill = ask_command(conn)
+            if kill:
                 break
-            else:
-                temp = re.search(r'\d+', command)
-                if temp:
-                    scp_num = temp.group()
-                    scp_num = scp_num.replace(" ", "-")
-                    # telnet_negotiation_line_mode(conn)
-                    text = scp_client.get_scp(scp_num)
-                    text = text.replace('\n', '\r\n')
-                    conn.send(text.encode("utf8"))
-
-
-
-            ask_command(conn)
         except Exception as e:
             print(e)
             break
