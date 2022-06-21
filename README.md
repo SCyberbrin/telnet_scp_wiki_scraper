@@ -17,7 +17,7 @@ It creates a telnet-server that makes it look like an old SCP Foundation Databas
 ## Setting up a work environment
 1. Check if you have latest version of Python 3 (im using python 3.8.10).<br>
     If you dont have the latest version of Python 3 or you dont have Python at all then go to the Python Website (https://www.python.org/) and Download it
-2. Install all the Requirements for the Project by typing this in the Terminal ```pip install -r requirements.txt
+2. Install all the Requirements for the Project by typing this in the Terminal ```pip install -r requirements.txt```
 
 ## Bug reports
 In case of a bug that you like to report to me or to the comunity then do it on the Issues Tap.
