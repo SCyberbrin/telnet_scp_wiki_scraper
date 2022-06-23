@@ -6,9 +6,9 @@ from _thread import start_new_thread
 
 from src.web_extractors.scp_wiki_wikidot import scp_wiki_wikidot
 
-PORT = os.environ['PORT'] if os.environ['PORT'] else 23
+PORT = int(os.environ.get('PORT', 23))
 
-UNICODE = os.environ['UNICODE'] if os.environ['UNICODE'] else "ansi"
+UNICODE = os.environ.get('UNICODE', "ansi")
 
 LOGO = b"""
                        JPYYYYYYYYYYYYYYPJ                       \r
