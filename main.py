@@ -6,9 +6,9 @@ from _thread import start_new_thread
 
 from src.web_extractors.scp_wiki_wikidot import scp_wiki_wikidot
 
-PORT = int(os.environ.get('PORT', 23))
+PORT = 23
 
-UNICODE = os.environ.get('UNICODE', "ansi")
+UNICODE = os.environ.get('UNICODE', "ascii")
 
 LOGO = b"""
                        JPYYYYYYYYYYYYYYPJ                       \r
@@ -64,7 +64,7 @@ def ask_command(conn: socket.socket) -> bool:
             scp_client = scp_wiki_wikidot()
             text = scp_client.get_scp(scp_num)
             text = text.replace('\n', '\r\n')
-            conn.send(text.encode(UNICODE))
+            conn.send(text.encode(UNICODE, "replace"))
         else:
             conn.send("Not a valid SCP\r\n".encode(UNICODE))
         return False
