@@ -70,24 +70,24 @@ def ask_command(conn: socket.socket) -> bool:
 
 def client_thread(conn: socket.socket): #threader client
     conn.send(LOGO)
-    
-		frame_symble = "@"
+
+    frame_symble = "@"
 
     warning = frame_symble + " WARNING: THE FOUNDATION DATABASE IS CLASSIFIED! " + frame_symble
     conn.send((frame_symble * len(warning)).encode(UNICODE) + b"\n\r")
     conn.send(warning.encode(UNICODE) + b"\n\r")
     conn.send((frame_symble * len(warning)).encode(UNICODE) + b"\n\r")
     conn.send(b"\n\r")
-    
+
     message = f"{frame_symble} ACCESS BY UNAUTHORIZED PERSONNEL IS STRICTLY PROHIBITED {frame_symble}"
     message1 = "PERPETRATORS WILL BE TRACKED, LOCATED, AND DETAINED".center(len(message) - 2)
     message1 = frame_symble + message1 + frame_symble
-    
+
     conn.send((frame_symble * len(message)).encode(UNICODE) + b"\n\r")
     conn.send(message.encode(UNICODE) + b"\n\r")
     conn.send(message1.encode(UNICODE) + b"\n\r")
     conn.send((frame_symble * len(message)).encode(UNICODE) + b"\n\r")
-		
+        
     while True:
         try:
             kill = ask_command(conn)
@@ -101,7 +101,7 @@ def client_thread(conn: socket.socket): #threader client
 
 
 def main ():
-    
+
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     print("Socket Created")
