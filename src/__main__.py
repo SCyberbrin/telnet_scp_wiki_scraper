@@ -1,13 +1,14 @@
 import re
 import socket
 import sys
+import os
 from _thread import start_new_thread
 
 from src.web_extractors.scp_wiki_wikidot import scp_wiki_wikidot
 
-PORT = 5001
+PORT = os.environ['PORT'] if os.environ['PORT'] else 23
 
-UNICODE = "ansi"
+UNICODE = os.environ['UNICODE'] if os.environ['UNICODE'] else "ansi"
 
 LOGO = b"""
                        JPYYYYYYYYYYYYYYPJ                       \r
