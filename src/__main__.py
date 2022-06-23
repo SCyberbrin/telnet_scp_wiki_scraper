@@ -7,7 +7,7 @@ from src.web_extractors.scp_wiki_wikidot import scp_wiki_wikidot
 
 PORT = 5001
 
-UNICODE = "utf8"
+UNICODE = "ansi"
 
 LOGO = b"""
                        JPYYYYYYYYYYYYYYPJ                       \r
@@ -39,12 +39,13 @@ LOGO = b"""
                          .:^~!!!!!!~^:.                         \r
 \n\r
 """
+
 def readline(conn: socket.socket) -> str:
     line = ""
     while True:
         data = conn.recv(8)
         line += data.decode(UNICODE)
-        if not data or data == b"\r\n":
+        if not data or b"\r\n" in data:
             break
     return line
 
@@ -108,7 +109,7 @@ def main ():
 
     try:
         server.bind(("", PORT))
-        server.listen(5)
+        server.listen(0)
     except socket.error as e:
         print(str(e))
         sys.exit()
