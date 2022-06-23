@@ -35,4 +35,9 @@ class scp_wiki_wikidot:
         for div in content.findChildren("div", recursive=False):
             div.decompose()
 
-        return content.get_text()
+        content_text = content.getText()
+
+        if not "Object Class:" in content_text:
+            return None
+        
+        return content_text
