@@ -4,7 +4,7 @@ WORKDIR /opt/telnet_scp
 
 COPY requirements.txt .
 COPY main.py .
-COPY src .
+COPY src ./src
 
 
 RUN pip install -r requirements.txt

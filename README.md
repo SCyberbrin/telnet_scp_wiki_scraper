@@ -10,14 +10,27 @@ It creates a telnet-server that makes it look like an old SCP Foundation Databas
 1. Check if you have latest version of Python 3 (im using python 3.8.10).<br>
     If you dont have the latest version of Python 3 or you dont have Python at all then go to the Python Website (https://www.python.org/) and Download it
 2. Clone or download the Project in your local Maschine. <br>
-    for clone ```git clone <project url here>```
+    for clone ```git clone <project url here>``` (it must be done in the project folder)
 3. Install all the Requirements for the Project by typing this in the Terminal ```pip install -r requirements.txt```
 4. Start the Server with ```python3 main.py```
+
+## Using it
+If you want to change the default telnet port (23) to something else, then it must be done in the environment.
+- UNICODE: str (default ascii)
+
+
+## Docker Version
+1. Clone or download the Project in your local Maschine. <br>
+    for clone ```git clone <project url here>```
+
+2. Build the docker image in the Terminal ```docker build . -t telnet_scp``` (it must be done in the project folder)
+
+3. Run the build image with ```docker run telnet_scp```
 
 ## Setting up a work environment
 1. Check if you have latest version of Python 3 (im using python 3.8.10).<br>
     If you dont have the latest version of Python 3 or you dont have Python at all then go to the Python Website (https://www.python.org/) and Download it
-2. Install all the Requirements for the Project by typing this in the Terminal ```pip install -r requirements.txt```
+2. Install all the Requirements for the Project by typing this in the Terminal ```pip install -r requirements.txt``` (it must be done in the project folder)
 
 ## Bug reports
 In case of a bug that you like to report to me or to the comunity then do it on the Issues Tap.
