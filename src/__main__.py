@@ -2,12 +2,12 @@ import re
 import socket
 import sys
 from _thread import start_new_thread
-from colorama import Fore, Back, Style
 
 from src.web_extractors.scp_wiki_wikidot import scp_wiki_wikidot
 
-HOST = ""
 PORT = 5001
+
+UNICODE = "ansi"
 
 LOGO = b"""
                        JPYYYYYYYYYYYYYYPJ                       \r
@@ -40,10 +40,19 @@ LOGO = b"""
 \n\r
 """
 
+def readline(conn: socket.socket) -> str:
+    line = ""
+    while True:
+        data = conn.recv(8)
+        line += data.decode(UNICODE)
+        if not data or b"\r\n" in data:
+            break
+    return line
+
 
 def ask_command(conn: socket.socket) -> bool:
     conn.send(b"SCP> ")
-    command = conn.recv(8).decode("utf8")
+    command = readline(conn)
     if re.search("quit", command):
         return True
     else:
@@ -54,16 +63,32 @@ def ask_command(conn: socket.socket) -> bool:
             scp_client = scp_wiki_wikidot()
             text = scp_client.get_scp(scp_num)
             text = text.replace('\n', '\r\n')
-            conn.send(text.encode("utf8"))
+            conn.send(text.encode(UNICODE))
         else:
-            conn.send("Not a valid SCP\r\n".encode("utf8"))
+            conn.send("Not a valid SCP\r\n".encode(UNICODE))
         return False
 
 
 def client_thread(conn: socket.socket): #threader client
     conn.send(LOGO)
-    welcome = b"Welcome to the server. Type something and hit enter \r\n"
-    conn.send(welcome)
+
+    frame_symble = "@"
+
+    warning = frame_symble + " WARNING: THE FOUNDATION DATABASE IS CLASSIFIED! " + frame_symble
+    conn.send((frame_symble * len(warning)).encode(UNICODE) + b"\n\r")
+    conn.send(warning.encode(UNICODE) + b"\n\r")
+    conn.send((frame_symble * len(warning)).encode(UNICODE) + b"\n\r")
+    conn.send(b"\n\r")
+
+    message = f"{frame_symble} ACCESS BY UNAUTHORIZED PERSONNEL IS STRICTLY PROHIBITED {frame_symble}"
+    message1 = "PERPETRATORS WILL BE TRACKED, LOCATED, AND DETAINED".center(len(message) - 2)
+    message1 = frame_symble + message1 + frame_symble
+
+    conn.send((frame_symble * len(message)).encode(UNICODE) + b"\n\r")
+    conn.send(message.encode(UNICODE) + b"\n\r")
+    conn.send(message1.encode(UNICODE) + b"\n\r")
+    conn.send((frame_symble * len(message)).encode(UNICODE) + b"\n\r")
+        
     while True:
         try:
             kill = ask_command(conn)
@@ -77,14 +102,14 @@ def client_thread(conn: socket.socket): #threader client
 
 
 def main ():
-    
+
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     print("Socket Created")
 
     try:
-        server.bind((HOST, PORT))
-        server.listen(5)
+        server.bind(("", PORT))
+        server.listen(0)
     except socket.error as e:
         print(str(e))
         sys.exit()
