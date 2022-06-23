@@ -1,12 +1,14 @@
 FROM python:3.8
 
-WORKDIR /telnet_scp
+WORKDIR /opt/telnet_scp
 
 COPY requirements.txt .
+COPY main.py .
+COPY src .
+
 
 RUN pip install -r requirements.txt
 
-COPY main.py .
-COPY src/ .
+
 
 CMD ["python", "./main.py"]
