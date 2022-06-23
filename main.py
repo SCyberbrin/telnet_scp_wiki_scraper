@@ -1,5 +1,6 @@
 from src import __main__
+import sys
 
 
 if __name__ == '__main__':
-    __main__.main()
+   sys.exit(__main__.main())
