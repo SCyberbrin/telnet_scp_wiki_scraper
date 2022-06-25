@@ -24,4 +24,4 @@ def fake_login(conn: socket.socket):
         conn.send(b"\r\nPlease enter a valid Password!\r\n")
 
     conn.send(b"ACCESS GRANTED\r\n")
-    conn.send(b"Welcome \r\n")
+    conn.send(b"Welcome\r\n")

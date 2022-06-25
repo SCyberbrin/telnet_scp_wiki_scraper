@@ -2,7 +2,7 @@ import re
 import socket
 import sys
 from _thread import start_new_thread
-from src import PORT, UNICODE
+from src import PORT, UNICODE, VERSION
 from src.fake_login.fake_login import fake_login
 
 from src.web_extractors.scp_wiki_wikidot import scp_wiki_wikidot
@@ -47,6 +47,15 @@ def ask_command(conn: socket.socket) -> bool:
     command = readline(conn)
     if re.search("quit", command):
         return True
+
+    elif re.search("info", command):
+        infomessage = f"""The SCP Foundation Telnet Protocol
+Version: {VERSION}
+Running on: ??????"""
+        infomessage = infomessage.replace("\n", "\n\r")
+        
+        conn.send(bytes(infomessage + "\n\r", UNICODE))
+
     else:
         temp = re.search(r'\d+', command)
         if temp:
@@ -58,14 +67,12 @@ def ask_command(conn: socket.socket) -> bool:
             conn.send(text.encode(UNICODE, "replace"))
         else:
             conn.send("Not a valid SCP\r\n".encode(UNICODE))
-        return False
+    return False
 
 
 def client_thread(conn: socket.socket): #threader client
     conn.send(bytearray([255, 254, 1]))
-
-    rev = conn.recv(1024)
-    print(rev.hex(":"))
+    conn.recv(1024)
 
 
     conn.send(LOGO)
