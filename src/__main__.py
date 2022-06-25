@@ -1,14 +1,13 @@
 import re
 import socket
 import sys
-import os
 from _thread import start_new_thread
+from src import PORT, UNICODE
+from src.fake_login.fake_login import fake_login
 
 from src.web_extractors.scp_wiki_wikidot import scp_wiki_wikidot
+from src.uis.uis import readline, textFrame
 
-PORT = 23
-
-UNICODE = os.environ.get('UNICODE', "ascii")
 
 LOGO = b"""
                        JPYYYYYYYYYYYYYYPJ                       \r
@@ -41,14 +40,6 @@ LOGO = b"""
 \n\r
 """
 
-def readline(conn: socket.socket) -> str:
-    line = ""
-    while True:
-        data = conn.recv(8)
-        line += data.decode(UNICODE)
-        if not data or b"\r\n" in data:
-            break
-    return line
 
 
 def ask_command(conn: socket.socket) -> bool:
@@ -71,24 +62,22 @@ def ask_command(conn: socket.socket) -> bool:
 
 
 def client_thread(conn: socket.socket): #threader client
+    conn.send(bytearray([255, 254, 1]))
+
+    rev = conn.recv(1024)
+    print(rev.hex(":"))
+
+
     conn.send(LOGO)
 
-    frame_symble = "@"
+    conn.send(bytes(textFrame("WARNING: THE FOUNDATION DATABASE IS CLASSIFIED!"), UNICODE))
 
-    warning = frame_symble + " WARNING: THE FOUNDATION DATABASE IS CLASSIFIED! " + frame_symble
-    conn.send((frame_symble * len(warning)).encode(UNICODE) + b"\n\r")
-    conn.send(warning.encode(UNICODE) + b"\n\r")
-    conn.send((frame_symble * len(warning)).encode(UNICODE) + b"\n\r")
-    conn.send(b"\n\r")
+    message = """ACCESS BY UNAUTHORIZED PERSONNEL IS STRICTLY PROHIBITED
+PERPETRATORS WILL BE TRACKED, LOCATED, AND DETAINED"""
 
-    message = f"{frame_symble} ACCESS BY UNAUTHORIZED PERSONNEL IS STRICTLY PROHIBITED {frame_symble}"
-    message1 = "PERPETRATORS WILL BE TRACKED, LOCATED, AND DETAINED".center(len(message) - 2)
-    message1 = frame_symble + message1 + frame_symble
+    conn.send(bytes(textFrame(message), UNICODE))
 
-    conn.send((frame_symble * len(message)).encode(UNICODE) + b"\n\r")
-    conn.send(message.encode(UNICODE) + b"\n\r")
-    conn.send(message1.encode(UNICODE) + b"\n\r")
-    conn.send((frame_symble * len(message)).encode(UNICODE) + b"\n\r")
+    fake_login(conn)
         
     while True:
         try:
