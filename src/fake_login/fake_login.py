@@ -14,7 +14,7 @@ def fake_login(conn: socket.socket):
         conn.send(b"\r\nPlease enter your Username!\r\n")
 
     while True:
-        conn.send(b"PASS> ")
+        conn.send(b"\n\rPASS> ")
         password = readline(conn, False)
         
         if password:

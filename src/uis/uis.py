@@ -4,16 +4,24 @@ from src import UNICODE
 
 
 def readline(conn: socket.socket, echo: bool = True) -> str:
-    line = ""
-    while True:
-        data = conn.recv(8)
-        if echo:
-            conn.send(data)
-        if not data or b"\r\n" in data:
+    buf: bytes = bytes()
+    while(True):
+        mess = conn.recv(1024)
+        if mess == b'\r\n':
             break
-        line += data.decode(UNICODE)
-    return line
 
+        if echo and len(mess.decode('utf-8')) <= 1:
+            conn.send(mess)
+
+        buf += mess
+    return buf.decode(UNICODE)
+
+def sendCommand(conn: socket.socket, command: bytearray) -> bool:
+    conn.send(command)
+    mess = conn.recv(1024)
+    if command in mess:
+        return True
+    return False
 
 def textFrame(texts: str, frame_symble: str = "@") -> str:
     maxText: int = 0

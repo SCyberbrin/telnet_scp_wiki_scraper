@@ -2,11 +2,11 @@ import re
 import socket
 import sys
 from _thread import start_new_thread
-from src import PORT, UNICODE, VERSION
+from src import GITHUB, PORT, UNICODE, VERSION
 from src.fake_login.fake_login import fake_login
 
 from src.web_extractors.scp_wiki_wikidot import scp_wiki_wikidot
-from src.uis.uis import readline, textFrame
+from src.uis.uis import readline, textFrame, sendCommand
 
 
 LOGO = b"""
@@ -51,10 +51,12 @@ def ask_command(conn: socket.socket) -> bool:
     elif re.search("info", command):
         infomessage = f"""The SCP Foundation Telnet Protocol
 Version: {VERSION}
-Running on: ??????"""
+Running on: ??????
+
+{GITHUB}"""
         infomessage = infomessage.replace("\n", "\n\r")
         
-        conn.send(bytes(infomessage + "\n\r", UNICODE))
+        conn.send((infomessage + "\n\r").encode(UNICODE))
 
     else:
         temp = re.search(r'\d+', command)
@@ -66,23 +68,21 @@ Running on: ??????"""
             text = text.replace('\n', '\r\n')
             conn.send(text.encode(UNICODE, "replace"))
         else:
-            conn.send("Not a valid SCP\r\n".encode(UNICODE))
+            conn.send("\r\nNot a valid SCP\r\n".encode(UNICODE))
     return False
 
 
 def client_thread(conn: socket.socket): #threader client
-    conn.send(bytearray([255, 254, 1]))
-    conn.recv(1024)
-
+    sendCommand(conn, bytearray([255, 254, 1]))
 
     conn.send(LOGO)
 
-    conn.send(bytes(textFrame("WARNING: THE FOUNDATION DATABASE IS CLASSIFIED!"), UNICODE))
+    conn.send(textFrame("WARNING: THE FOUNDATION DATABASE IS CLASSIFIED!").encode(UNICODE))
 
     message = """ACCESS BY UNAUTHORIZED PERSONNEL IS STRICTLY PROHIBITED
 PERPETRATORS WILL BE TRACKED, LOCATED, AND DETAINED"""
 
-    conn.send(bytes(textFrame(message), UNICODE))
+    conn.send(textFrame(message).encode(UNICODE))
 
     fake_login(conn)
         
