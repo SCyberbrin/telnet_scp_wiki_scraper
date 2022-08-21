@@ -8,6 +8,8 @@ class scp_wiki_wikidot:
     def get_scp(self, scp_id: str) -> str:
         scp_id = scp_id.lower()
         
+        scp_id = scp_id.zfill(3)
+        
         url = self.URL + scp_id
         html = requests.get(url).text
         soup = BeautifulSoup(html, "html.parser")
