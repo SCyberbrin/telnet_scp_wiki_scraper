@@ -1,13 +1,20 @@
 import re
 import socket
 import sys
+import logging
 from _thread import start_new_thread
+
 from src import GITHUB, PORT, UNICODE, VERSION, LOGO
 from src.fake_login.fake_login import fake_login
-
 from src.web_extractors.scp_wiki_wikidot import scp_wiki_wikidot
 from src.uis.uis import readline, textFrame, sendCommand
 
+logging.basicConfig(level=logging.INFO,
+    handlers=[
+        logging.FileHandler("app.log"),
+        logging.StreamHandler(sys.stdout)
+    ],
+    format='%(asctime)s:%(levelname)s: %(message)s')
 
 def ask_command(conn: socket.socket) -> bool:
     conn.send(b"SCP> ")
@@ -63,32 +70,31 @@ PERPETRATORS WILL BE TRACKED, LOCATED, AND DETAINED"""
             if kill:
                 break
         except Exception as e:
-            print(e)
+            logging.error(e)
             break
     conn.close()
 
 
 
 def main ():
-
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    print("Socket Created")
+    logging.debug("Socket Created")
 
     try:
         server.bind(("", PORT))
         server.listen(0)
     except socket.error as e:
-        print(str(e))
+        logging.error(str(e))
         sys.exit()
 
     while True:
         try:
             conn, addr = server.accept()
-            print("Connected with " + addr[0] + ":" + str(addr[1]))
+            logging.info("Connected with " + addr[0] + ":" + str(addr[1]))
             start_new_thread(client_thread, (conn, ))
         except Exception as e:
-            print(e)
+            logging.error(e)
             break
 
     server.close()
