@@ -1,61 +1,37 @@
 import re
 import socket
 import sys
-import os
+import logging
 from _thread import start_new_thread
 
+from src import GITHUB, PORT, UNICODE, VERSION, LOGO
+from src.fake_login.fake_login import fake_login
 from src.web_extractors.scp_wiki_wikidot import scp_wiki_wikidot
+from src.uis.uis import readline, textFrame, sendCommand
 
-PORT = 23
-
-UNICODE = os.environ.get('UNICODE', "ascii")
-
-LOGO = b"""
-                       JPYYYYYYYYYYYYYYPJ                       \r
-                      :@5..............5@:                      \r
-                    :!P@^              ^@P!:                    \r
-                .!YPPY7:                :7YPPY!.                \r
-              ^YG57:           77           :75GY^              \r
-            ~PB?:           ..~@@~..           :?BP~            \r
-          :P#7         :!JPB&@@@@@@&BPJ!:         7#P:          \r
-         !&5.       :?G@@@#PY??@@??YP#@@@G?:       .5&!         \r
-        ?@7       :5&@@P7:    .&&.    :7P@@&5:       7@?        \r
-       ?@!       ?&@@Y:       .&&.       :Y@@&?       !@?       \r
-      ^@J       Y@@B^       :PG@@GP:       ^B@@Y       J@^      \r
-      P#.      ?@@B.         !@@@@!         .B@@?      .#P      \r
-     .@Y      .&@@~           ^&&^           ~@@&.      Y@.     \r
-     ^@!      ~@@B             ^^             B@@~      !@^     \r
-     ^@!      ~@@B     :Y55PPG7  7GPP55Y:     B@@~      7@^     \r
-     :@Y      .&@@~   .!#@@@@?    ?@@@@#!.   ~@@&.      Y@:     \r
-   :JBP~       ?@@B~?G##57BB^      ^BB75##G?~B@@?       ~PBJ:   \r
-  ~@G:         ^#@@@#7^   ..        ..   ^7#@@@#^         :G@~  \r
-   !#7        7#GY&@&J:                  :J&@&YG#7        7#!   \r
-    ^#Y        .  :5&@@P7:            :7P@@&5:  .        Y#^    \r
-     .GG.           :?G@@@#PY?7777?YP#@@@G?:           .GG.     \r
-       Y#^             :!JPB&@@@@@@&BPJ!:             ^#Y       \r
-        7#!  .:~:           .::::::.           :~:.  !#7        \r
-         ~#P5PP5G57:                        :75G5PP5P#~         \r
-          :!^.  .!YPPY7^:              :^7YPPY!.  .^!:          \r
-                    :!J5PP55YJJ??JJY55PP5J!:                    \r
-                         .:^~!!!!!!~^:.                         \r
-\n\r
-"""
-
-def readline(conn: socket.socket) -> str:
-    line = ""
-    while True:
-        data = conn.recv(8)
-        line += data.decode(UNICODE)
-        if not data or b"\r\n" in data:
-            break
-    return line
-
+logging.basicConfig(level=logging.INFO,
+    handlers=[
+        logging.FileHandler("app.log"),
+        logging.StreamHandler(sys.stdout)
+    ],
+    format='%(asctime)s:%(levelname)s: %(message)s')
 
 def ask_command(conn: socket.socket) -> bool:
     conn.send(b"SCP> ")
     command = readline(conn)
     if re.search("quit", command):
         return True
+
+    elif re.search("info", command):
+        infomessage = f"""The SCP Foundation Telnet Protocol
+Version: {VERSION}
+Running on: ??????
+
+{GITHUB}"""
+        infomessage = infomessage.replace("\n", "\n\r")
+        
+        conn.send((infomessage + "\n\r").encode(UNICODE))
+
     else:
         temp = re.search(r'\d+', command)
         if temp:
@@ -66,29 +42,27 @@ def ask_command(conn: socket.socket) -> bool:
             text = text.replace('\n', '\r\n')
             conn.send(text.encode(UNICODE, "replace"))
         else:
-            conn.send("Not a valid SCP\r\n".encode(UNICODE))
-        return False
+            conn.send("\r\nNot a valid SCP\r\n".encode(UNICODE))
+    return False
 
 
 def client_thread(conn: socket.socket): #threader client
+    conn.send("If nothing happens then press enter!\r\n".encode(UNICODE))
+
+    sendCommand(conn, bytearray([255, 254, 1]))
+
     conn.send(LOGO)
 
-    frame_symble = "@"
+    conn.send(textFrame("WARNING: THE FOUNDATION DATABASE IS CLASSIFIED!").encode(UNICODE))
 
-    warning = frame_symble + " WARNING: THE FOUNDATION DATABASE IS CLASSIFIED! " + frame_symble
-    conn.send((frame_symble * len(warning)).encode(UNICODE) + b"\n\r")
-    conn.send(warning.encode(UNICODE) + b"\n\r")
-    conn.send((frame_symble * len(warning)).encode(UNICODE) + b"\n\r")
-    conn.send(b"\n\r")
+    message = """ACCESS BY UNAUTHORIZED PERSONNEL IS STRICTLY PROHIBITED
+PERPETRATORS WILL BE TRACKED, LOCATED, AND DETAINED"""
 
-    message = f"{frame_symble} ACCESS BY UNAUTHORIZED PERSONNEL IS STRICTLY PROHIBITED {frame_symble}"
-    message1 = "PERPETRATORS WILL BE TRACKED, LOCATED, AND DETAINED".center(len(message) - 2)
-    message1 = frame_symble + message1 + frame_symble
+    conn.send(textFrame(message).encode(UNICODE))
 
-    conn.send((frame_symble * len(message)).encode(UNICODE) + b"\n\r")
-    conn.send(message.encode(UNICODE) + b"\n\r")
-    conn.send(message1.encode(UNICODE) + b"\n\r")
-    conn.send((frame_symble * len(message)).encode(UNICODE) + b"\n\r")
+    fake_login(conn)
+
+    conn.send("Type the nummber of the SCP your searching. \n Type 'info' for information about the client and 'quit' for disconnecting.\n\r".encode(UNICODE))
         
     while True:
         try:
@@ -96,32 +70,31 @@ def client_thread(conn: socket.socket): #threader client
             if kill:
                 break
         except Exception as e:
-            print(e)
+            logging.error(e)
             break
     conn.close()
 
 
 
 def main ():
-
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    print("Socket Created")
+    logging.debug("Socket Created")
 
     try:
         server.bind(("", PORT))
         server.listen(0)
     except socket.error as e:
-        print(str(e))
+        logging.error(str(e))
         sys.exit()
 
     while True:
         try:
             conn, addr = server.accept()
-            print("Connected with " + addr[0] + ":" + str(addr[1]))
+            logging.info("Connected with " + addr[0] + ":" + str(addr[1]))
             start_new_thread(client_thread, (conn, ))
         except Exception as e:
-            print(e)
+            logging.error(e)
             break
 
     server.close()
