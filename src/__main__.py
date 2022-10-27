@@ -2,44 +2,11 @@ import re
 import socket
 import sys
 from _thread import start_new_thread
-from src import GITHUB, PORT, UNICODE, VERSION
+from src import GITHUB, PORT, UNICODE, VERSION, LOGO
 from src.fake_login.fake_login import fake_login
 
 from src.web_extractors.scp_wiki_wikidot import scp_wiki_wikidot
 from src.uis.uis import readline, textFrame, sendCommand
-
-
-LOGO = b"""
-                       JPYYYYYYYYYYYYYYPJ                       \r
-                      :@5..............5@:                      \r
-                    :!P@^              ^@P!:                    \r
-                .!YPPY7:                :7YPPY!.                \r
-              ^YG57:           77           :75GY^              \r
-            ~PB?:           ..~@@~..           :?BP~            \r
-          :P#7         :!JPB&@@@@@@&BPJ!:         7#P:          \r
-         !&5.       :?G@@@#PY??@@??YP#@@@G?:       .5&!         \r
-        ?@7       :5&@@P7:    .&&.    :7P@@&5:       7@?        \r
-       ?@!       ?&@@Y:       .&&.       :Y@@&?       !@?       \r
-      ^@J       Y@@B^       :PG@@GP:       ^B@@Y       J@^      \r
-      P#.      ?@@B.         !@@@@!         .B@@?      .#P      \r
-     .@Y      .&@@~           ^&&^           ~@@&.      Y@.     \r
-     ^@!      ~@@B             ^^             B@@~      !@^     \r
-     ^@!      ~@@B     :Y55PPG7  7GPP55Y:     B@@~      7@^     \r
-     :@Y      .&@@~   .!#@@@@?    ?@@@@#!.   ~@@&.      Y@:     \r
-   :JBP~       ?@@B~?G##57BB^      ^BB75##G?~B@@?       ~PBJ:   \r
-  ~@G:         ^#@@@#7^   ..        ..   ^7#@@@#^         :G@~  \r
-   !#7        7#GY&@&J:                  :J&@&YG#7        7#!   \r
-    ^#Y        .  :5&@@P7:            :7P@@&5:  .        Y#^    \r
-     .GG.           :?G@@@#PY?7777?YP#@@@G?:           .GG.     \r
-       Y#^             :!JPB&@@@@@@&BPJ!:             ^#Y       \r
-        7#!  .:~:           .::::::.           :~:.  !#7        \r
-         ~#P5PP5G57:                        :75G5PP5P#~         \r
-          :!^.  .!YPPY7^:              :^7YPPY!.  .^!:          \r
-                    :!J5PP55YJJ??JJY55PP5J!:                    \r
-                         .:^~!!!!!!~^:.                         \r
-\n\r
-"""
-
 
 
 def ask_command(conn: socket.socket) -> bool:
@@ -73,6 +40,8 @@ Running on: ??????
 
 
 def client_thread(conn: socket.socket): #threader client
+    conn.send("If nothing happens then press enter!\r\n".encode(UNICODE))
+
     sendCommand(conn, bytearray([255, 254, 1]))
 
     conn.send(LOGO)

@@ -4,17 +4,18 @@ from src import UNICODE
 
 
 def readline(conn: socket.socket, echo: bool = True) -> str:
-    buf: bytes = bytes()
+    buf: str = ""
     while(True):
         mess = conn.recv(1024)
-        if mess == b'\r\n':
-            break
 
-        if echo and len(mess.decode('utf-8')) <= 1:
+        if echo and len(mess.decode(UNICODE)) <= 1:
             conn.send(mess)
 
-        buf += mess
-    return buf.decode(UNICODE)
+        buf += mess.decode(UNICODE).strip()
+
+        if mess.decode(UNICODE).__contains__('\r\n'):
+            break
+    return buf
 
 def sendCommand(conn: socket.socket, command: bytearray) -> bool:
     conn.send(command)
