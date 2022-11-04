@@ -1,6 +1,6 @@
 import re
 import socket
-import sys
+import sys, getopt
 import logging
 from _thread import start_new_thread
 
@@ -76,13 +76,32 @@ PERPETRATORS WILL BE TRACKED, LOCATED, AND DETAINED"""
 
 
 
-def main ():
+def main (argv):
+    port = PORT
+
+    try:
+        opts, args = getopt.getopt(argv,"t")
+    except getopt.GetoptError:
+        print('-t debug mode')
+        sys.exit(2)
+
+    for opt, arg in opts:
+        if opt == '-t':
+            # Test mode
+            port = 5002
+
+            logging.getLogger().setLevel(logging.DEBUG)
+            logging.debug(f"port changed to {port}")
+
+
+
+
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     logging.debug("Socket Created")
 
     try:
-        server.bind(("", PORT))
+        server.bind(("", port))
         server.listen(0)
     except socket.error as e:
         logging.error(str(e))

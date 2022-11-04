@@ -3,4 +3,4 @@ import sys
 
 
 if __name__ == '__main__':
-   sys.exit(__main__.main())
+   sys.exit(__main__.main(sys.argv[1:]))
