@@ -70,7 +70,7 @@ PERPETRATORS WILL BE TRACKED, LOCATED, AND DETAINED"""
 
     fake_login(conn)
 
-    conn.send("Type the nummber of the SCP your searching. \n Type 'info' for information about the client and 'quit' for disconnecting.\n\r".encode(UNICODE))
+    conn.send("Type the nummber of the SCP your searching.\n\rType 'info' for information about the client and 'quit' for disconnecting.\n\r".encode(UNICODE))
         
     while True:
         try:
