@@ -8,6 +8,9 @@ from src import GITHUB, PORT, UNICODE, VERSION, LOGO
 from src.fake_login.fake_login import fake_login
 from src.web_extractors.scp_wiki_wikidot import scp_wiki_wikidot
 from src.uis.uis import readline, textFrame, sendCommand
+from src.cache_system import scp_cache_system
+
+cache = scp_cache_system()
 
 logging.basicConfig(level=logging.INFO,
     handlers=[
@@ -37,9 +40,14 @@ Running on: ??????
         if temp:
             scp_num = temp.group()
             scp_num = scp_num.replace(" ", "-")
-            scp_client = scp_wiki_wikidot()
-            text = scp_client.get_scp(scp_num)
-            text = text.replace('\n', '\r\n')
+            if not cache.exist(scp_num):
+                scp_client = scp_wiki_wikidot()
+                text = scp_client.get_scp(scp_num)
+                text = text.replace('\n', '\r\n')
+                cache.add(scp_num, text)
+            else:
+                text = cache.get(scp_num)
+            
             conn.send(text.encode(UNICODE, "replace"))
         else:
             conn.send("\r\nNot a valid SCP\r\n".encode(UNICODE))
