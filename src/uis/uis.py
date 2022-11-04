@@ -13,7 +13,7 @@ def readline(conn: socket.socket, echo: bool = True) -> str:
 
         buf += mess.decode(UNICODE).strip()
 
-        if mess.decode(UNICODE).__contains__('\r\n'):
+        if mess.decode(UNICODE).endswith('\r\n') or mess.decode(UNICODE).endswith('^M'):
             break
     return buf
 
