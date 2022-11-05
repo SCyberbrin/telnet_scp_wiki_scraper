@@ -9,7 +9,9 @@ from src.fake_login.fake_login import fake_login
 from src.web_extractors.scp_wiki_wikidot import scp_wiki_wikidot
 from src.uis.uis import readline, textFrame, sendCommand
 from src.cache_system import scp_cache_system
+from src.connection_cooldown import cooldown_system
 
+cold_sys = cooldown_system()
 cache = scp_cache_system()
 
 logging.basicConfig(level=logging.INFO,
@@ -119,6 +121,10 @@ def main (argv):
         try:
             conn, addr = server.accept()
             logging.info("Connected with " + addr[0] + ":" + str(addr[1]))
+            if not cold_sys.valid_user(conn): # Checks if users cooldown limit has reached
+                conn.send("Please be patient with your request, you haven't reached your 5 minutes cooldown!\n\rPlease come back next time.".encode(UNICODE))
+                conn.close()
+                continue
             start_new_thread(client_thread, (conn, ))
         except Exception as e:
             logging.error(e)
