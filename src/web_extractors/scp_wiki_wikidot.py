@@ -31,7 +31,7 @@ class scp_wiki_wikidot:
 
     def get_content(self, body: BeautifulSoup) -> Union[str, None]:
         content = body.find("div", id="page-content")
-        if not content or content == NavigableString:
+        if not content or isinstance(content, NavigableString):
             return None
 
         for div in content.findChildren("div", recursive=False):

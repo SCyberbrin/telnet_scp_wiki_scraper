@@ -32,7 +32,8 @@ def ask_command(conn: socket.socket) -> bool:
 Version: {VERSION}
 Running on: ??????
 
-{GITHUB}"""
+{GITHUB}
+Source: scp-wiki.wikidot.com"""
         infomessage = infomessage.replace("\n", "\n\r")
         
         conn.send((infomessage + "\n\r").encode(UNICODE))

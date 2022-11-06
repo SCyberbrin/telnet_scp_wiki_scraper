@@ -38,4 +38,4 @@ In case of a bug that you like to report to me or to the comunity then do it on 
 
 ## TODOS/IDEAD
 - [x] Add a cache system in tmp folder, for caching the scp report text.
-- [ ] Add Cooldown system for users
+- [x] Add Cooldown system for users

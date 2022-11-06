@@ -20,8 +20,7 @@ class scp_cache_system:
     def add(self, scp_num: str, message: str) -> None:
         self.__create_exist()
         with open(self.TMP_FILE, "a", newline="", encoding=UNICODE) as f_stream:
-            _writer = csv.writer(f_stream, delimiter=',',
-                quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            _writer = csv.writer(f_stream, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             _writer.writerow([scp_num, message])
 
     def get(self, scp_num: str) -> str:
