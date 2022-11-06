@@ -1,6 +1,6 @@
 import re
 import socket
-import sys
+import sys, getopt
 import logging
 from _thread import start_new_thread
 
@@ -8,6 +8,11 @@ from src import GITHUB, PORT, UNICODE, VERSION, LOGO
 from src.fake_login.fake_login import fake_login
 from src.web_extractors.scp_wiki_wikidot import scp_wiki_wikidot
 from src.uis.uis import readline, textFrame, sendCommand
+from src.cache_system import scp_cache_system
+from src.connection_cooldown import cooldown_system
+
+cold_sys = cooldown_system()
+cache = scp_cache_system()
 
 logging.basicConfig(level=logging.INFO,
     handlers=[
@@ -27,7 +32,8 @@ def ask_command(conn: socket.socket) -> bool:
 Version: {VERSION}
 Running on: ??????
 
-{GITHUB}"""
+{GITHUB}
+Source: scp-wiki.wikidot.com"""
         infomessage = infomessage.replace("\n", "\n\r")
         
         conn.send((infomessage + "\n\r").encode(UNICODE))
@@ -37,9 +43,14 @@ Running on: ??????
         if temp:
             scp_num = temp.group()
             scp_num = scp_num.replace(" ", "-")
-            scp_client = scp_wiki_wikidot()
-            text = scp_client.get_scp(scp_num)
-            text = text.replace('\n', '\r\n')
+            if not cache.exist(scp_num):
+                scp_client = scp_wiki_wikidot()
+                text = scp_client.get_scp(scp_num)
+                text = text.replace('\n', '\r\n')
+                cache.add(scp_num, text)
+            else:
+                text = cache.get(scp_num)
+            
             conn.send(text.encode(UNICODE, "replace"))
         else:
             conn.send("\r\nNot a valid SCP\r\n".encode(UNICODE))
@@ -62,7 +73,7 @@ PERPETRATORS WILL BE TRACKED, LOCATED, AND DETAINED"""
 
     fake_login(conn)
 
-    conn.send("Type the nummber of the SCP your searching. \n Type 'info' for information about the client and 'quit' for disconnecting.\n\r".encode(UNICODE))
+    conn.send("Type the nummber of the SCP your searching.\n\rType 'info' for information about the client and 'quit' for disconnecting.\n\r".encode(UNICODE))
         
     while True:
         try:
@@ -76,13 +87,32 @@ PERPETRATORS WILL BE TRACKED, LOCATED, AND DETAINED"""
 
 
 
-def main ():
+def main (argv):
+    port = PORT
+
+    try:
+        opts, args = getopt.getopt(argv,"t")
+    except getopt.GetoptError:
+        print('-t debug mode')
+        sys.exit(2)
+
+    for opt, arg in opts:
+        if opt == '-t':
+            # Test mode
+            port = 5002
+
+            logging.getLogger().setLevel(logging.DEBUG)
+            logging.debug(f"port changed to {port}")
+
+
+
+
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     logging.debug("Socket Created")
 
     try:
-        server.bind(("", PORT))
+        server.bind(("", port))
         server.listen(0)
     except socket.error as e:
         logging.error(str(e))
@@ -92,6 +122,10 @@ def main ():
         try:
             conn, addr = server.accept()
             logging.info("Connected with " + addr[0] + ":" + str(addr[1]))
+            if not cold_sys.valid_user(conn): # Checks if users cooldown limit has reached
+                conn.send("Please be patient with your request, you haven't reached your 5 minutes cooldown!\n\rPlease come back next time.".encode(UNICODE))
+                conn.close()
+                continue
             start_new_thread(client_thread, (conn, ))
         except Exception as e:
             logging.error(e)

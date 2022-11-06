@@ -6,14 +6,14 @@ from src import UNICODE
 def readline(conn: socket.socket, echo: bool = True) -> str:
     buf: str = ""
     while(True):
-        mess = conn.recv(1024)
+        mess = conn.recv(1024).decode(UNICODE)
 
-        if echo and len(mess.decode(UNICODE)) <= 1:
-            conn.send(mess)
+        if echo and len(mess) <= 1:
+            conn.send(mess.encode(UNICODE))
 
-        buf += mess.decode(UNICODE).strip()
+        buf += mess.strip()
 
-        if mess.decode(UNICODE).__contains__('\r\n'):
+        if mess.endswith('\r\n') or mess.endswith('\r') or mess.endswith('\n') or mess.endswith('\036'):
             break
     return buf
 

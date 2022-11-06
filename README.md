@@ -34,3 +34,8 @@ If you want to change the default telnet port (23) to something else, then it mu
 
 ## Bug reports
 In case of a bug that you like to report to me or to the comunity then do it on the Issues Tap.
+
+
+## TODOS/IDEAD
+- [x] Add a cache system in tmp folder, for caching the scp report text.
+- [x] Add Cooldown system for users
