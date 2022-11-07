@@ -25,7 +25,6 @@ def readline(conn: socket.socket, echo: bool = True) -> str:
 
         if b'\r\n' in mess or b'\r' in mess or b'\n' in mess:
             break
-    print(buf)
     return buf
 
 def sendCommand(conn: socket.socket, command: bytearray) -> bool:
