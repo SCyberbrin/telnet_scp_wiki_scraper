@@ -1,6 +1,6 @@
 import re
 import socket
-import sys, getopt
+import sys, getopt, os
 import logging
 from _thread import start_new_thread
 
@@ -34,9 +34,8 @@ Running on: ??????
 
 {GITHUB}
 Source: scp-wiki.wikidot.com"""
-        infomessage = infomessage.replace("\n", "\n\r")
         
-        conn.send((infomessage + "\n\r").encode(UNICODE))
+        conn.send((infomessage + os.linesep).encode(UNICODE))
 
     else:
         temp = re.search(r'\d+', command)
@@ -46,12 +45,12 @@ Source: scp-wiki.wikidot.com"""
             if not cache.exist(scp_num):
                 scp_client = scp_wiki_wikidot()
                 text = scp_client.get_scp(scp_num)
-                text = text.replace('\n', '\r\n')
                 cache.add(scp_num, text)
             else:
                 text = cache.get(scp_num)
             
-            conn.send(text.encode(UNICODE, "replace"))
+            conn.send(text.encode(UNICODE))
+
         else:
             conn.send("\r\nNot a valid SCP\r\n".encode(UNICODE))
     return False

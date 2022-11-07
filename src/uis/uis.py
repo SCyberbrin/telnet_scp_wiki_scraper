@@ -2,19 +2,30 @@ import socket
 
 from src import UNICODE
 
-
 def readline(conn: socket.socket, echo: bool = True) -> str:
+    """There are terminals that return only if the enter button is pressed and
+    terminals that return if any button is been pressed."""
+    
     buf: str = ""
-    while(True):
-        mess = conn.recv(1024).decode(UNICODE)
+    while(True): # TODO: Test on windows terminal
+        mess = conn.recv(1024)
 
-        if echo and len(mess) <= 1:
-            conn.send(mess.encode(UNICODE))
+        # print(mess)
+        # print(codecs.encode(mess, "hex"))
 
-        buf += mess.strip()
+        str_mess = mess.decode(UNICODE)
 
-        if mess.endswith('\r\n') or mess.endswith('\r') or mess.endswith('\n') or mess.endswith('\036'):
+        if echo and len(str_mess) <= 1: # TODO: REMOVE LATER IF NOT NEEDED
+            pass
+            # conn.send(mess.encode(UNICODE))
+
+        
+        buf += str_mess.strip()
+        
+
+        if b'\r\n' in mess or b'\r' in mess or b'\n' in mess:
             break
+    print(buf)
     return buf
 
 def sendCommand(conn: socket.socket, command: bytearray) -> bool:
