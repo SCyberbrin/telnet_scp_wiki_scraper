@@ -23,7 +23,7 @@ logging.basicConfig(level=logging.INFO,
     format='%(asctime)s:%(levelname)s: %(message)s')
 
 def ask_command(conn: socket.socket, is_echo_off: bool) -> bool:
-    conn.send(b"SCP> ")
+    conn.send(b"\rSCP> ")
     command = readline(conn, is_echo_off)
     if re.search("quit", command):
         return True

@@ -22,7 +22,7 @@ class scp_wiki_wikidot:
         if not title or not content:
             return "No SCP found\n\r"
         
-        return os.linesep + title + os.linesep + content + os.linesep
+        return os.linesep + title.replace("\n", "\r\n") + os.linesep + content.replace("\n", "\r\n") + os.linesep
 
     def get_title(self, body: BeautifulSoup) -> Union[str, None]:
         title = body.find("div", id="page-title")
