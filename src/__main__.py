@@ -7,7 +7,8 @@ from _thread import start_new_thread
 from src import GITHUB, PORT, UNICODE, VERSION, LOGO
 from src.fake_login.fake_login import fake_login
 from src.web_extractors.scp_wiki_wikidot import scp_wiki_wikidot
-from src.uis.uis import readline, textFrame, sendCommand
+from src.uis.uis import textFrame
+from src.telnet_io import echoOff, readline
 from src.cache_system import scp_cache_system
 from src.connection_cooldown import cooldown_system
 
@@ -21,9 +22,9 @@ logging.basicConfig(level=logging.INFO,
     ],
     format='%(asctime)s:%(levelname)s: %(message)s')
 
-def ask_command(conn: socket.socket) -> bool:
+def ask_command(conn: socket.socket, is_echo_off: bool) -> bool:
     conn.send(b"SCP> ")
-    command = readline(conn)
+    command = readline(conn, is_echo_off)
     if re.search("quit", command):
         return True
 
@@ -59,7 +60,9 @@ Source: scp-wiki.wikidot.com"""
 def client_thread(conn: socket.socket): #threader client
     conn.send("If nothing happens then press enter!\r\n".encode(UNICODE))
 
-    sendCommand(conn, bytearray([255, 254, 1]))
+    # sendCommand(conn, bytearray([255, 254, 1]))
+    is_echo_off = echoOff(conn)
+
 
     conn.send(LOGO)
 
@@ -70,13 +73,13 @@ PERPETRATORS WILL BE TRACKED, LOCATED, AND DETAINED"""
 
     conn.send(textFrame(message).encode(UNICODE))
 
-    fake_login(conn)
+    fake_login(conn, is_echo_off)
 
     conn.send("Type the nummber of the SCP your searching.\n\rType 'info' for information about the client and 'quit' for disconnecting.\n\r".encode(UNICODE))
         
     while True:
         try:
-            kill = ask_command(conn)
+            kill = ask_command(conn, is_echo_off)
             if kill:
                 break
         except Exception as e:
