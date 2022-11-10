@@ -22,9 +22,6 @@ def readline(conn: socket.socket, echo: bool = True) -> str:
     while(True): # TODO: Test on windows terminal
         mess = conn.recv(1024)
 
-        # print(mess)
-        # print(codecs.encode(mess, "hex"))
-
         str_mess = mess.decode(UNICODE)
 
         if echo and len(str_mess) <= 1: # TODO: REMOVE LATER IF NOT NEEDED
