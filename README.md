@@ -40,4 +40,5 @@ In case of a bug that you like to report to me or to the comunity then do it on 
 - [x] Add a cache system in tmp folder, for caching the scp report text.
 - [x] Add Cooldown system for users.
 - [x] Optimize the code for TelnetIO.
+- [ ] add "\r" on every newline
 - [ ] Rewrite the Telnet functions to a class
