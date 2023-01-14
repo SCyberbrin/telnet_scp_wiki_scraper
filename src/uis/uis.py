@@ -10,8 +10,7 @@ def textFrame(texts: str, frame_symble: str = "@") -> str:
 
     _texts = [f"{frame_symble} {i.center(maxText)} {frame_symble}" for i in texts.splitlines()]
         
-
-    longFrames = "\n\r" + (frame_symble * (maxText + 4)) + "\n\r"
-    finishedOutput = longFrames + "\n\r".join(_texts) + longFrames
+    longFrames = f"\n{frame_symble * (maxText + 4)}\n"
+    finishedOutput = longFrames + "\n".join(_texts) + longFrames
 
     return finishedOutput

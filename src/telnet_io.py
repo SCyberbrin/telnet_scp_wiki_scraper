@@ -35,6 +35,13 @@ def readline(conn: socket.socket, echo: bool = True) -> str:
             break
     return buf
 
+def sendline(conn: socket.socket, message: str, newline: str = "\n\r") -> None:
+    message = message.replace("\n", "\n\r")
+    
+    _message = f"\r{message}{newline}"
+    
+    conn.send(_message.encode(UNICODE))
+
 def echoOff(conn: socket.socket) -> bool:
     conn.send(bytearray([255, 254, 1]))
     mess = conn.recv(1024)
