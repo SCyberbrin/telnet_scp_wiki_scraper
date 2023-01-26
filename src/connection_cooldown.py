@@ -7,7 +7,6 @@ class cooldown_system:
     # USER STANDART: (time: datetime, ip: str)
     __USER_LIST:list[tuple[datetime, str]] = []
 
-
     def valid_user(self, conn: socket.socket, time_limit_minuts: int = 5) -> bool:
 
         conn_ip = conn.getpeername()[0]
@@ -27,8 +26,6 @@ class cooldown_system:
 
     # If the user didnt reached his limit
         return False
-            
-
 
     def __read_list(self, conn_ip: str) -> Union[tuple[datetime, str], None]:
         for user in self.__USER_LIST:

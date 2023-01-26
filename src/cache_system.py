@@ -1,4 +1,4 @@
-import platform, os, csv
+import os, csv
 from typing import Union
 import logging
 import tempfile

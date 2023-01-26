@@ -1,27 +1,56 @@
 import socket
+from src import LOGO
 
-from src.telnet_io import readline
+from src.telnet_io import readline, sendline
+
+def textFrame(texts: str, frame_symble: str = "@") -> str:
+    maxText: int = 0
+
+    finishedOutput: str
+
+    for text in texts.splitlines():
+        if len(text) > maxText:
+            maxText = len(text)
+
+    _texts = [f"{frame_symble} {i.center(maxText)} {frame_symble}" for i in texts.splitlines()]
+        
+    longFrames = f"\n{frame_symble * (maxText + 4)}\n"
+    finishedOutput = longFrames + "\n".join(_texts) + longFrames
+
+    return finishedOutput
 
 def fake_login(conn: socket.socket, is_echo_off: bool):
-    conn.send(b"LOGIN: \n\r")
+    sendline(conn, LOGO)
+
+    sendline(conn, textFrame("WARNING: THE FOUNDATION DATABASE IS CLASSIFIED!"))
+
+
+    message = """ACCESS BY UNAUTHORIZED PERSONNEL IS STRICTLY PROHIBITED
+PERPETRATORS WILL BE TRACKED, LOCATED, AND DETAINED"""
+
+    sendline(conn, textFrame(message))
+
+
+
+    sendline(conn, "LOGIN: ")
     while True:
-        conn.send(b"USER> ")
+        sendline(conn, "USER> ", newline="")
         username = readline(conn, is_echo_off)
         
         if username:
             break
         
-        conn.send(b"\r\nPlease enter your Username!\r\n")
+        sendline(conn, "\r\nPlease enter your Username!")
 
     while True:
-        conn.send(b"\n\rPASS> ")
+        sendline(conn, "\n\rPASS> ", newline="")
         password = readline(conn, False)
         
         if password:
-            conn.send(b"\n\r")
+            sendline(conn, "")
             break
         
-        conn.send(b"\r\nPlease enter a valid Password!\r\n")
+        sendline(conn, "\r\nPlease enter a valid Password!")
 
-    conn.send(b"ACCESS GRANTED\r\n")
-    conn.send(b"Welcome\r\n")
+    sendline(conn, "ACCESS GRANTED")
+    sendline(conn, "Welcome")
