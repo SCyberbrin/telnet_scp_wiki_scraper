@@ -1,12 +1,12 @@
 import socket
 
-from src.uis.uis import readline
+from src.telnet_io import readline
 
-def fake_login(conn: socket.socket):
+def fake_login(conn: socket.socket, is_echo_off: bool):
     conn.send(b"LOGIN: \n\r")
     while True:
         conn.send(b"USER> ")
-        username = readline(conn)
+        username = readline(conn, is_echo_off)
         
         if username:
             break

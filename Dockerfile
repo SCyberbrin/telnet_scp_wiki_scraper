@@ -1,16 +1,21 @@
-FROM python:3.9
-
-WORKDIR /opt/telnet_scp
-
-COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
-
-
-COPY main.py .
-COPY src ./src
+FROM python:3.9-alpine
 
 
 
-CMD ["python", "-u", "./main.py"]
+WORKDIR /home/telnetscp
+
+
+RUN pip install --upgrade pip
+
+
+COPY requirements.txt requirements.txt
+
+RUN pip install -r requirements.txt
+
+
+
+COPY . .
+
+CMD ["python", "-u", "main.py"]
 
 EXPOSE 23

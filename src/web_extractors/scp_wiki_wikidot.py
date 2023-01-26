@@ -1,5 +1,5 @@
 import requests
-from bs4 import BeautifulSoup, Tag, NavigableString
+from bs4 import BeautifulSoup, NavigableString
 from typing import Union
 
 class scp_wiki_wikidot:
@@ -19,9 +19,9 @@ class scp_wiki_wikidot:
         content = self.get_content(soup)
 
         if not title or not content:
-            return "No SCP found\n\r"
+            return "No SCP found"
         
-        return title + "\n\n\r" + content + "\n\r"
+        return content
 
     def get_title(self, body: BeautifulSoup) -> Union[str, None]:
         title = body.find("div", id="page-title")

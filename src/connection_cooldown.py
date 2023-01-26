@@ -10,7 +10,7 @@ class cooldown_system:
 
     def valid_user(self, conn: socket.socket, time_limit_minuts: int = 5) -> bool:
 
-        conn_ip = conn.getsockname()[0]
+        conn_ip = conn.getpeername()[0]
         conn_row = self.__read_list(conn_ip)
         
         _time = datetime.now() + timedelta(minutes=time_limit_minuts) # Create time with extra 5 min

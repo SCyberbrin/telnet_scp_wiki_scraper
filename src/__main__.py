@@ -1,13 +1,14 @@
 import re
 import socket
-import sys, getopt
+import sys, getopt, os
 import logging
 from _thread import start_new_thread
 
-from src import GITHUB, PORT, UNICODE, VERSION, LOGO
+from src import GITHUB, PORT, VERSION, LOGO
 from src.fake_login.fake_login import fake_login
 from src.web_extractors.scp_wiki_wikidot import scp_wiki_wikidot
-from src.uis.uis import readline, textFrame, sendCommand
+from src.uis.uis import textFrame
+from src.telnet_io import echoOff, readline, sendline
 from src.cache_system import scp_cache_system
 from src.connection_cooldown import cooldown_system
 
@@ -21,9 +22,9 @@ logging.basicConfig(level=logging.INFO,
     ],
     format='%(asctime)s:%(levelname)s: %(message)s')
 
-def ask_command(conn: socket.socket) -> bool:
-    conn.send(b"SCP> ")
-    command = readline(conn)
+def ask_command(conn: socket.socket, is_echo_off: bool) -> bool:
+    sendline(conn, "SCP> ", newline="")
+    command = readline(conn, is_echo_off)
     if re.search("quit", command):
         return True
 
@@ -34,9 +35,8 @@ Running on: ??????
 
 {GITHUB}
 Source: scp-wiki.wikidot.com"""
-        infomessage = infomessage.replace("\n", "\n\r")
         
-        conn.send((infomessage + "\n\r").encode(UNICODE))
+        sendline(conn, infomessage)
 
     else:
         temp = re.search(r'\d+', command)
@@ -46,38 +46,42 @@ Source: scp-wiki.wikidot.com"""
             if not cache.exist(scp_num):
                 scp_client = scp_wiki_wikidot()
                 text = scp_client.get_scp(scp_num)
-                text = text.replace('\n', '\r\n')
                 cache.add(scp_num, text)
             else:
                 text = cache.get(scp_num)
             
-            conn.send(text.encode(UNICODE, "replace"))
+            sendline(conn, text)
+
         else:
-            conn.send("\r\nNot a valid SCP\r\n".encode(UNICODE))
+            sendline(conn, "Not a valid SCP")
     return False
 
 
 def client_thread(conn: socket.socket): #threader client
-    conn.send("If nothing happens then press enter!\r\n".encode(UNICODE))
+    sendline(conn, "If nothing happens then press enter!")
 
-    sendCommand(conn, bytearray([255, 254, 1]))
+    is_echo_off = echoOff(conn)
 
-    conn.send(LOGO)
 
-    conn.send(textFrame("WARNING: THE FOUNDATION DATABASE IS CLASSIFIED!").encode(UNICODE))
+    sendline(conn, LOGO)
+
+    sendline(conn, textFrame("WARNING: THE FOUNDATION DATABASE IS CLASSIFIED!"))
+
 
     message = """ACCESS BY UNAUTHORIZED PERSONNEL IS STRICTLY PROHIBITED
 PERPETRATORS WILL BE TRACKED, LOCATED, AND DETAINED"""
 
-    conn.send(textFrame(message).encode(UNICODE))
+    sendline(conn, textFrame(message))
 
-    fake_login(conn)
+    fake_login(conn, is_echo_off)
 
-    conn.send("Type the nummber of the SCP your searching.\n\rType 'info' for information about the client and 'quit' for disconnecting.\n\r".encode(UNICODE))
-        
+
+    sendline(conn, "Type the nummber of the SCP your searching.\nType 'info' for information about the client and 'quit' for disconnecting.")
+
+
     while True:
         try:
-            kill = ask_command(conn)
+            kill = ask_command(conn, is_echo_off)
             if kill:
                 break
         except Exception as e:
@@ -123,7 +127,7 @@ def main (argv):
             conn, addr = server.accept()
             logging.info("Connected with " + addr[0] + ":" + str(addr[1]))
             if not cold_sys.valid_user(conn): # Checks if users cooldown limit has reached
-                conn.send("Please be patient with your request, you haven't reached your 5 minutes cooldown!\n\rPlease come back next time.".encode(UNICODE))
+                sendline(conn, "Please be patient with your request, you haven't reached your 5 minutes cooldown!\nPlease come back next time.")
                 conn.close()
                 continue
             start_new_thread(client_thread, (conn, ))
