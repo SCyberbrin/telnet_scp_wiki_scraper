@@ -1,7 +1,6 @@
 import os
-from xml.etree.ElementTree import VERSION
 
-VERSION = "0.1.1"
+VERSION = "0.1.2"
 
 UNICODE = os.environ.get('UNICODE', "utf-8")
 

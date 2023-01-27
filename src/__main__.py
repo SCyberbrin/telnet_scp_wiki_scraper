@@ -1,13 +1,12 @@
 import re
 import socket
-import sys, getopt, os
+import sys, getopt
 import logging
 from _thread import start_new_thread
 
-from src import GITHUB, PORT, VERSION, LOGO
+from src import GITHUB, PORT, VERSION
 from src.fake_login.fake_login import fake_login
 from src.web_extractors.scp_wiki_wikidot import scp_wiki_wikidot
-from src.uis.uis import textFrame
 from src.telnet_io import echoOff, readline, sendline
 from src.cache_system import scp_cache_system
 from src.connection_cooldown import cooldown_system
@@ -61,17 +60,6 @@ def client_thread(conn: socket.socket): #threader client
     sendline(conn, "If nothing happens then press enter!")
 
     is_echo_off = echoOff(conn)
-
-
-    sendline(conn, LOGO)
-
-    sendline(conn, textFrame("WARNING: THE FOUNDATION DATABASE IS CLASSIFIED!"))
-
-
-    message = """ACCESS BY UNAUTHORIZED PERSONNEL IS STRICTLY PROHIBITED
-PERPETRATORS WILL BE TRACKED, LOCATED, AND DETAINED"""
-
-    sendline(conn, textFrame(message))
 
     fake_login(conn, is_echo_off)
 
