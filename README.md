@@ -41,6 +41,6 @@ In case of a bug that you like to report to me or to the comunity then do it on 
 - [x] Add Cooldown system for users.
 - [x] Optimize the code for TelnetIO.
 - [x] Rewrite the Telnet functions to a class
-- [ ] Send Error message when the source size is not responding.
-- [ ] add "\r" on every newline
+- [ ] Send Error message when the source side is not responding. (Forgot what i meant)
+- [x] add "\r" on every newline
 - [x] Rewrite the Telnet functions to a class
