@@ -2,7 +2,7 @@ import re
 import socket
 import sys, getopt
 import logging
-from _thread import start_new_thread
+import threading
 
 from src import GITHUB, PORT, VERSION
 from src.fake_login.fake_login import fake_login
@@ -56,26 +56,31 @@ Source: scp-wiki.wikidot.com"""
     return False
 
 
-def client_thread(conn: socket.socket): #threader client
-    sendline(conn, "If nothing happens then press enter!")
+class ClientThread(threading.Thread):
+    def __init__(self, conn: socket.socket):
+        threading.Thread.__init__(self)
+        self.conn: socket.socket = conn
 
-    is_echo_off = echoOff(conn)
+    def run(self):
+        sendline(self.conn, "If nothing happens then press enter!")
 
-    fake_login(conn, is_echo_off)
+        is_echo_off = echoOff(self.conn)
+
+        fake_login(self.conn, is_echo_off)
 
 
-    sendline(conn, "Type the nummber of the SCP your searching.\nType 'info' for information about the client and 'quit' for disconnecting.")
+        sendline(self.conn, "Type the nummber of the SCP your searching.\nType 'info' for information about the client and 'quit' for disconnecting.")
 
 
-    while True:
-        try:
-            kill = ask_command(conn, is_echo_off)
-            if kill:
+        while True:
+            try:
+                kill = ask_command(self.conn, is_echo_off)
+                if kill:
+                    break
+            except Exception as e:
+                logging.error(e)
                 break
-        except Exception as e:
-            logging.error(e)
-            break
-    conn.close()
+        self.conn.close()
 
 
 
@@ -126,7 +131,9 @@ def main (argv):
                 conn.close()
                 logging.info(f"{addr[0]}:{str(addr[1])} didn't reach cooldown (Disconnected)")
                 continue
-            start_new_thread(client_thread, (conn, ))
+            
+            thread = ClientThread(conn)
+            thread.start()
         except Exception as e:
             logging.error(e)
             break
