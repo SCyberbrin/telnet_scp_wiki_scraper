@@ -2,9 +2,9 @@ import re
 import socket
 import sys, getopt
 import logging
-from _thread import start_new_thread
+import threading
 
-from src import GITHUB, PORT, VERSION
+from src import GITHUB, PORT, TIMEOUT, VERSION
 from src.fake_login.fake_login import fake_login
 from src.web_extractors.scp_wiki_wikidot import scp_wiki_wikidot
 from src.telnet_io import echoOff, readline, sendline
@@ -19,7 +19,7 @@ logging.basicConfig(level=logging.INFO,
         logging.FileHandler("app.log"),
         logging.StreamHandler(sys.stdout)
     ],
-    format='%(asctime)s:%(levelname)s: %(message)s')
+    format='[%(asctime)s][%(levelname)s]: %(message)s')
 
 def ask_command(conn: socket.socket, is_echo_off: bool) -> bool:
     sendline(conn, "SCP> ", newline="")
@@ -56,45 +56,65 @@ Source: scp-wiki.wikidot.com"""
     return False
 
 
-def client_thread(conn: socket.socket): #threader client
-    sendline(conn, "If nothing happens then press enter!")
+class ClientThread(threading.Thread):
+    def __init__(self, conn: socket.socket):
+        threading.Thread.__init__(self)
+        self.conn: socket.socket = conn
 
-    is_echo_off = echoOff(conn)
-
-    fake_login(conn, is_echo_off)
-
-
-    sendline(conn, "Type the nummber of the SCP your searching.\nType 'info' for information about the client and 'quit' for disconnecting.")
-
-
-    while True:
+    def run(self):
         try:
-            kill = ask_command(conn, is_echo_off)
-            if kill:
-                break
+            sendline(self.conn, "If nothing happens then press enter!")
+
+            is_echo_off = echoOff(self.conn)
+
+            fake_login(self.conn, is_echo_off)
+
+
+            sendline(self.conn, "Type the nummber of the SCP your searching.\nType 'info' for information about the client and 'quit' for disconnecting.")
+
+
+            while True:
+                kill = ask_command(self.conn, is_echo_off)
+                if kill:
+                    break
         except Exception as e:
             logging.error(e)
-            break
-    conn.close()
+        finally:
+            self.conn.close()
 
 
 
 def main (argv):
     port = PORT
+    timeout = TIMEOUT
 
     try:
-        opts, args = getopt.getopt(argv,"t")
+        opts, args = getopt.getopt(argv,"t:dp:c")
     except getopt.GetoptError:
-        print('-t debug mode')
+        print("""-d debug mode
+-p change port (default port is 23)
+-t set Timeout in Sec. (default is 5 Min.)
+-c disable cooldown system (for debug only)
+""")
         sys.exit(2)
 
     for opt, arg in opts:
-        if opt == '-t':
-            # Test mode
-            port = 5002
-
+        if opt == '-d':
+            # Debug mode
             logging.getLogger().setLevel(logging.DEBUG)
+            logging.debug("Debug mode on")
+        elif opt == '-p':
+            # change port
+            port = int(arg)
             logging.debug(f"port changed to {port}")
+        elif opt == '-c':
+            # Disable cooldown_system
+            cold_sys.disable()
+            logging.debug("cooldown_system is down")
+        elif opt == '-t':
+            # Set custom timeout
+            timeout = int(arg)
+            logging.debug(f"Set timeout to {timeout} sec.")
 
 
 
@@ -117,8 +137,12 @@ def main (argv):
             if not cold_sys.valid_user(conn): # Checks if users cooldown limit has reached
                 sendline(conn, "Please be patient with your request, you haven't reached your 5 minutes cooldown!\nPlease come back next time.")
                 conn.close()
+                logging.info(f"{addr[0]}:{str(addr[1])} didn't reach cooldown (Disconnected)")
                 continue
-            start_new_thread(client_thread, (conn, ))
+            
+            conn.settimeout(timeout)
+            thread = ClientThread(conn)
+            thread.start()
         except Exception as e:
             logging.error(e)
             break

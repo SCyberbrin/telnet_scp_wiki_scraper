@@ -6,8 +6,16 @@ from datetime import datetime, timedelta
 class cooldown_system:
     # USER STANDART: (time: datetime, ip: str)
     __USER_LIST:list[tuple[datetime, str]] = []
+    __DISABLED = False
+
+    def disable(self):
+        """Disables the cooldown system for debug"""
+        self.__DISABLED = True
+
 
     def valid_user(self, conn: socket.socket, time_limit_minuts: int = 5) -> bool:
+        if self.__DISABLED:
+            return True
 
         conn_ip = conn.getpeername()[0]
         conn_row = self.__read_list(conn_ip)
