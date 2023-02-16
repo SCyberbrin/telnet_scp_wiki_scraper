@@ -1,4 +1,4 @@
-import socket
+import socket, logging
 
 from src import UNICODE
 
@@ -19,12 +19,14 @@ def readline(conn: socket.socket, echo: bool = True) -> str:
     terminals that return if any button is been pressed."""
     
     buf: str = ""
-    while(True): # TODO: Test on windows terminal
+    while(True):
         mess = conn.recv(1024)
+        if not mess:
+            break
 
         str_mess = mess.decode(UNICODE)
 
-        if echo and len(str_mess) <= 1: # TODO: REMOVE LATER IF NOT NEEDED
+        if echo and len(str_mess) <= 1:
             conn.send(mess)
 
         

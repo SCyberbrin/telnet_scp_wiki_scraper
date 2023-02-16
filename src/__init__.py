@@ -6,6 +6,8 @@ UNICODE = os.environ.get('UNICODE', "utf-8")
 
 PORT = 23
 
+TIMEOUT = 300 # 5 Min.
+
 GITHUB = "https://github.com/SCyberbrin/telnet_scp_wiki_scraper"
 
 

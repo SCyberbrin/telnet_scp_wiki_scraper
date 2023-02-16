@@ -4,7 +4,7 @@ import sys, getopt
 import logging
 import threading
 
-from src import GITHUB, PORT, VERSION
+from src import GITHUB, PORT, TIMEOUT, VERSION
 from src.fake_login.fake_login import fake_login
 from src.web_extractors.scp_wiki_wikidot import scp_wiki_wikidot
 from src.telnet_io import echoOff, readline, sendline
@@ -62,54 +62,59 @@ class ClientThread(threading.Thread):
         self.conn: socket.socket = conn
 
     def run(self):
-        sendline(self.conn, "If nothing happens then press enter!")
+        try:
+            sendline(self.conn, "If nothing happens then press enter!")
 
-        is_echo_off = echoOff(self.conn)
+            is_echo_off = echoOff(self.conn)
 
-        fake_login(self.conn, is_echo_off)
-
-
-        sendline(self.conn, "Type the nummber of the SCP your searching.\nType 'info' for information about the client and 'quit' for disconnecting.")
+            fake_login(self.conn, is_echo_off)
 
 
-        while True:
-            try:
+            sendline(self.conn, "Type the nummber of the SCP your searching.\nType 'info' for information about the client and 'quit' for disconnecting.")
+
+
+            while True:
                 kill = ask_command(self.conn, is_echo_off)
                 if kill:
                     break
-            except Exception as e:
-                logging.error(e)
-                break
-        self.conn.close()
+        except Exception as e:
+            logging.error(e)
+        finally:
+            self.conn.close()
 
 
 
 def main (argv):
     port = PORT
+    timeout = TIMEOUT
 
     try:
-        opts, args = getopt.getopt(argv,"td")
+        opts, args = getopt.getopt(argv,"t:dp:c")
     except getopt.GetoptError:
-        print("""-t debug mode
+        print("""-d debug mode
 -p change port (default port is 23)
--d disable cooldown system (for debug only)
+-t set Timeout in Sec. (default is 5 Min.)
+-c disable cooldown system (for debug only)
 """)
         sys.exit(2)
 
     for opt, arg in opts:
-        if opt == '-t':
-            # Test mode
+        if opt == '-d':
+            # Debug mode
             logging.getLogger().setLevel(logging.DEBUG)
             logging.debug("Debug mode on")
         elif opt == '-p':
             # change port
             port = int(arg)
             logging.debug(f"port changed to {port}")
-
-        elif opt == '-d':
+        elif opt == '-c':
             # Disable cooldown_system
             cold_sys.disable()
             logging.debug("cooldown_system is down")
+        elif opt == '-t':
+            # Set custom timeout
+            timeout = int(arg)
+            logging.debug(f"Set timeout to {timeout} sec.")
 
 
 
@@ -135,6 +140,7 @@ def main (argv):
                 logging.info(f"{addr[0]}:{str(addr[1])} didn't reach cooldown (Disconnected)")
                 continue
             
+            conn.settimeout(timeout)
             thread = ClientThread(conn)
             thread.start()
         except Exception as e:
