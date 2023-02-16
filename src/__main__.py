@@ -83,9 +83,9 @@ def main (argv):
     port = PORT
 
     try:
-        opts, args = getopt.getopt(argv,"t")
+        opts, args = getopt.getopt(argv,"td")
     except getopt.GetoptError:
-        print('-t debug mode')
+        print('-t debug mode\n-d disable cooldown system (for debug only)')
         sys.exit(2)
 
     for opt, arg in opts:
@@ -94,7 +94,14 @@ def main (argv):
             port = 5002
 
             logging.getLogger().setLevel(logging.DEBUG)
+            logging.debug("Debug mode on")
             logging.debug(f"port changed to {port}")
+
+
+        if opt == '-d':
+            # Disable cooldown_system
+            cold_sys.disable()
+            logging.debug("cooldown_system is down")
 
 
 
@@ -117,6 +124,7 @@ def main (argv):
             if not cold_sys.valid_user(conn): # Checks if users cooldown limit has reached
                 sendline(conn, "Please be patient with your request, you haven't reached your 5 minutes cooldown!\nPlease come back next time.")
                 conn.close()
+                logging.info(f"{addr[0]}:{str(addr[1])} didn't reach cooldown (Disconnected)")
                 continue
             start_new_thread(client_thread, (conn, ))
         except Exception as e:
