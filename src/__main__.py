@@ -19,7 +19,7 @@ logging.basicConfig(level=logging.INFO,
         logging.FileHandler("app.log"),
         logging.StreamHandler(sys.stdout)
     ],
-    format='%(asctime)s:%(levelname)s: %(message)s')
+    format='[%(asctime)s][%(levelname)s]: %(message)s')
 
 def ask_command(conn: socket.socket, is_echo_off: bool) -> bool:
     sendline(conn, "SCP> ", newline="")
