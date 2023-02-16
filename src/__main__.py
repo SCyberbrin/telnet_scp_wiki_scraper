@@ -90,20 +90,23 @@ def main (argv):
     try:
         opts, args = getopt.getopt(argv,"td")
     except getopt.GetoptError:
-        print('-t debug mode\n-d disable cooldown system (for debug only)')
+        print("""-t debug mode
+-p change port (default port is 23)
+-d disable cooldown system (for debug only)
+""")
         sys.exit(2)
 
     for opt, arg in opts:
         if opt == '-t':
             # Test mode
-            port = 5002
-
             logging.getLogger().setLevel(logging.DEBUG)
             logging.debug("Debug mode on")
+        elif opt == '-p':
+            # change port
+            port = int(arg)
             logging.debug(f"port changed to {port}")
 
-
-        if opt == '-d':
+        elif opt == '-d':
             # Disable cooldown_system
             cold_sys.disable()
             logging.debug("cooldown_system is down")

@@ -1,6 +1,6 @@
 import os
 
-VERSION = "0.1.2"
+VERSION = "0.1.3"
 
 UNICODE = os.environ.get('UNICODE', "utf-8")
 
